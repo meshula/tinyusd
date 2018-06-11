@@ -104,7 +104,13 @@ should result in the executable running, without any complaints of missing dlls.
 ##On to tinyusd
 
 CMake isn't super fun to deal with, so for the purposes of this tutorial,
-please go clone LabCMake as a sister directory to tinyusd.
+please go clone LabCMake as a sister directory to tinyusd. LabCMake is here:
+
+```
+https://github.com/meshula/LabCMake.git
+```
+
+It doesn't have any build steps, it just needs to be available at the relative location.
 
 i.e.
 
@@ -122,4 +128,24 @@ the usual way.
 
 ```
 cmake -G "Visual Studio 15 2017 Win64" ../..
+```
+
+Make sure you have a c:\tmp directory.
+When you run the program, it should create a simple USDA file:
+
+```
+c:\tmp\test.usda
+```
+
+As a sanity check, the generated file should have the following contents:
+
+```
+#usda 1.0
+
+def Cube "Box"
+{
+    float3 xformOp:scale = (5, 5, 5)
+    uniform token[] xformOpOrder = ["xformOp:scale"]
+}
+
 ```
