@@ -8,12 +8,17 @@ set(LOCAL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/build/install")
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/scripts
                       ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/modules)
 
-add_executable(tinyusd "")
+set(LAB_PACKAGE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/packages/vcpkg/installed/x64-windows)
+
+set(LAB_BOOST_VCPKG ON)
 
 include(Utilities)
 include(Settings)
 include(Packages)
-lab_default_definitions(tinyusd 14)
+
+add_executable(tinyusd "")
+lab_default_definitions(tinyusd)
+lab_set_cxx_version(tinyusd 14)
 
 file(GLOB SRC "src/*.cpp")
 file(GLOB HEADERS "headers/*.h")
