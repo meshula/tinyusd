@@ -9,7 +9,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/scripts
                       ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/modules)
 
 set(LAB_PACKAGE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/packages/vcpkg/installed/x64-windows)
-
 set(LAB_BOOST_VCPKG ON)
 
 include(Utilities)

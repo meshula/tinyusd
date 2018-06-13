@@ -118,7 +118,7 @@ Projects/
    tinyusd/
 ```
 
-Go back into the build directory we made earlier, and create a tinyuusd directory,
+Go back into the build directory we made earlier, and create a tinyusd directory,
 and cd into it. Then, configure the cmake build files. Once again, make sure
 the INSTALL_PREFIX and TOOLCHAIN variables are pointed appropriately.
 
