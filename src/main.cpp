@@ -40,11 +40,12 @@ public:
         }
     }
 
-    void create_new_stage(const std::string& path)
+    void create_new_stage(std::string const& path)
     {
         TfNotice::Revoke(_objectsChangedNoticeKey);
 
         stage = UsdStage::CreateNew(path);
+
         // Start listening for change notices from this stage.
         auto self = TfCreateWeakPtr(this);
         _objectsChangedNoticeKey = TfNotice::Register(self, &SceneProxy::_OnObjectsChanged, stage);
@@ -55,6 +56,37 @@ public:
         GfVec3f scaleVec = { 5.f, 5.f, 5.f };
         UsdGeomXformable cubeXf(cube);
         cubeXf.AddScaleOp().Set(scaleVec);
+    }
+
+    void load_stage(std::string const& filePath)
+    {
+        printf("\nLoad_Stage : %s\n", filePath.c_str());
+        auto supported = UsdStage::IsSupportedFile(filePath);
+        if (supported)
+        {
+            printf("File format supported\n");
+        }
+        else
+        {
+            fprintf(stderr, "%s : File format not supported\n", filePath.c_str());
+            return;
+        }
+
+        UsdStageRefPtr loadedStage = UsdStage::Open(filePath);
+
+        if (loadedStage)
+        {
+            auto pseudoRoot = loadedStage->GetPseudoRoot();
+            printf("Pseudo root path: %s\n", pseudoRoot.GetPath().GetString().c_str());
+            for (auto const& c : pseudoRoot.GetChildren())
+            {
+                printf("\tChild path: %s\n", c.GetPath().GetString().c_str());
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Stage was not loaded");
+        }
     }
 
     void save_stage()
@@ -71,5 +103,9 @@ int main(char** argv, int argc)
     SceneProxy scene;
     scene.create_new_stage("C:\\TMP\\test.usda");
     scene.save_stage();
+
+    SceneProxy scene2;
+    scene2.load_stage("C:\\TMP\\test.usda");
+
     return 0;
 }

@@ -7,7 +7,17 @@ smallest possible viable USD program from scratch on Windows.
 It skips building Hydra, as that introduces significant complexity to the build
 process.
 
-##Shallow clone the USD dev branch into this project's packages directory.
+Prerequisites
+-------------
+
+- git
+- cmake 3.11 or greater installed for the command line
+- Visual Studio 2017
+
+Building
+--------
+
+Shallow clone the USD dev branch into this project's packages directory:
 
 ```
 cd tinyusd
@@ -16,9 +26,7 @@ cd packages
 git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
-##Install vcpkg.
-
-This only takes a couple of minutes.
+Install vcpkg. This only takes a couple of minutes:
 
 ```
 git clone --depth 1 https://github.com/Microsoft/vcpkg
@@ -26,9 +34,7 @@ cd vcpkg
 .\bootstrap-vcpkg.bat
 ```
 
-## build boost
-
-This takes a while, might be a good moment to file an issue on USD requesting
+Next, build boost. This takes a while, might be a good moment to file an issue on USD requesting
 the elimination of boost as a dependency ;) We're only going to install the bits
 USD needs, so bear with...
 
@@ -39,14 +45,15 @@ vcpkg install boost-assign:x64-windows boost-atomic:x64-windows boost-date-time:
 A little bit of other boost will be installed as a result, but don't worry about it.
 At least it's not all of boost which takes a really long time to build.
 
-## install the remaining dependencies
+Install the remaining dependencies:
 
 ```
 vcpkg install tbb:x64-windows zlib:x64-windows
 cd ..
 ```
 
-##make a build directory in the /tinyusd directory.
+Make a build directory in the /tinyusd directory:
+
 ```
 mkdir build
 cd build
@@ -54,9 +61,7 @@ mkdir usd
 cd usd
 ```
 
-##build USD
-
-We are going to build USD without python or the Imaging modules, as these
+Finally, build USD. We are going to build USD without python or the Imaging modules, as these
 introduce significant build complexity. We're also going to skip the Alembic
 plugin. Adding it is a simple matter of installing the libraries via vcpkg.
 
@@ -84,7 +89,7 @@ Now, build USD. I'm building on an older laptop, so I've specified two cores, /M
 cmake --build . --config Release --target install -- /M:2
 ```
 
-##Finish up the installation
+Finish up the installation: 
 
 In a little while, tinyusd/build/install will contain the USD installation. The
 USD install puts the runtime DLLs in the lib directory, so copy the dlls, and
@@ -93,12 +98,12 @@ the usd folder from the lib directory to the tinyusd/build/install/bin directory
 Also, copy the dlls from tinyusd/packages/vcpkg/installed/x64-windows/bin to
 the tinyusd/build/install/bin directory.
 
-##Double check your work
+Double check your work:
 
 There is an executable in the bin directory called sdfdump.exe. Running it
 should result in the executable running, without any complaints of missing dlls.
 
-##On to tinyusd
+On to tinyusd:
 
 CMake isn't super fun to deal with, so for the purposes of this tutorial,
 please go clone LabCMake as a sister directory to tinyusd. LabCMake is here:
