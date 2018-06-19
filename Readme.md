@@ -92,11 +92,14 @@ cmake --build . --config Release --target install -- /M:2
 Finish up the installation: 
 
 In a little while, tinyusd/build/install will contain the USD installation. The
-USD install puts the runtime DLLs in the lib directory, so copy the dlls, and
+USD install puts the runtime DLLs in the lib directory, so copy the libusd_ms.dll
+to the bin directory, and
 the usd folder from the lib directory to the tinyusd/build/install/bin directory.
 
-Also, copy the dlls from tinyusd/packages/vcpkg/installed/x64-windows/bin to
-the tinyusd/build/install/bin directory.
+When built without the imaging packages, there is no runtime dependency on boost,
+so the only other dll that needs to be copied is tbb.dll, from 
+tinyusd/packages/installed/x64-windows/bin/tbb.dll
+
 
 Double check your work:
 
