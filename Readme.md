@@ -42,13 +42,31 @@ USD needs, so bear with...
 vcpkg install boost-assign:x64-windows boost-atomic:x64-windows boost-date-time:x64-windows boost-filesystem:x64-windows boost-format:x64-windows boost-multi-index:x64-windows boost-program-options:x64-windows boost-thread:x64-windows boost-vmd:x64-windows
 ```
 
+
 A little bit of other boost will be installed as a result, but don't worry about it.
 At least it's not all of boost which takes a really long time to build.
 
 Install the remaining dependencies:
 
 ```
-vcpkg install tbb:x64-windows zlib:x64-windows
+vcpkg install tbb:x64-windows zlib:x64-windows glew:x64-windows
+```
+
+Optional: alembic
+
+```
+vcpkg install alembic:x64-windows
+```
+The version of Alembic in vcpkg includes
+the HDF5 backend, which means it takes rather a long time to build.
+
+Optional: ptex
+
+```
+vcpkg install ptex:x64-windows
+```
+
+```
 cd ..
 ```
 
@@ -57,39 +75,53 @@ Make a build directory in the /tinyusd directory:
 ```
 mkdir build
 cd build
+```
+
+Optional: install OpenSubdiv
+
+clone the code.
+
+```
+mkdir opensubdiv
+cd opensubdiv
+cmake ..\..\..\OpenSubdiv -DNO_REGRESSION=ON -DNO_DOC=ON -DNO_OMP=ON -DNO_CUDA=ON -DNO_OPENCL=ON -DNO_DX=ON -DNO_TESTS=ON -DGLEW_LOCATION=c:\Projects\meshula\aaa\vcpkg\installed\x64-windows -DNO_TBB=ON -DCMAKE_INSTALL_PREFIX=c:\Projects\meshula\aaa\install -G "Visual Studio 15 2017 Win64"
+
+cmake --build . --config Release --target install -- /M:2
+cd ..
+```
+
+```
 mkdir usd
 cd usd
 ```
 
-Finally, build USD. We are going to build USD without python or the Imaging modules, as these
-introduce significant build complexity. We're also going to skip the Alembic
-plugin. Adding it is a simple matter of installing the libraries via vcpkg.
+Configure USD
+-------------
+
+We are going to build USD without python, as python
+introduces significant build complexity.
 
 First, configure the build, from within the build/usd directory.
 
 In the command below, replace the PREFIX and TOOLCHAIN variable values with
 appropriate paths.
 
+
 ```
-cmake ^
--DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON ^
--DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF ^
--DPXR_BUILD_ALEMBIC_PLUGIN=OFF ^
--DPXR_BUILD_IMAGING=OFF  ^
--DCMAKE_CXX_FLAGS="/Zm150" ^
--DCMAKE_INSTALL_PREFIX=C:\projects\tinyusd\build\install ^
--DCMAKE_TOOLCHAIN_FILE=C:\projects\tinyusd\packages\vcpkg\scripts\buildsystems\vcpkg.cmake ^
--G "Visual Studio 15 2017 Win64" ^
-../../packages/USD
+cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_INSTALL_PREFIX=c:\Projects\meshula\aaa\install -DCMAKE_TOOLCHAIN_FILE=c:\Projects\meshula\aaa\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 15 2017 Win64" ../../packages/USD
 ```
 
-Now, build USD. I'm building on an older laptop, so I've specified two cores, /M:2.
+Build USD
+---------
+
+I'm building on an older laptop, so I've specified two cores, /M:2.
 
 ```
 cmake --build . --config Release --target install -- /M:2
 ```
 
-Finish up the installation: 
+Finish up the installation
+--------------------------
 
 In a little while, tinyusd/build/install will contain the USD installation. The
 USD install puts the runtime DLLs in the lib directory, so copy the libusd_ms.dll
@@ -97,16 +129,23 @@ to the bin directory, and
 the usd folder from the lib directory to the tinyusd/build/install/bin directory.
 
 When built without the imaging packages, there is no runtime dependency on boost,
-so the only other dll that needs to be copied is tbb.dll, from 
-tinyusd/packages/installed/x64-windows/bin/tbb.dll
+so the only other dlls that need to be copied are tbb.dll and zlib1.dll, from 
+tinyusd/packages/vcpkg/installed/x64-windows/bin.
+
+sdfdump.exe also requires boost_program_options.
+
+If you installed Ptex, you'll need to copy Ptex.dll.
 
 
-Double check your work:
+Double check your work
+----------------------
 
 There is an executable in the bin directory called sdfdump.exe. Running it
 should result in the executable running, without any complaints of missing dlls.
 
-On to tinyusd:
+
+TinyUsd
+-------
 
 CMake isn't super fun to deal with, so for the purposes of this tutorial,
 please go clone LabCMake as a sister directory to tinyusd. LabCMake is here:
@@ -134,7 +173,8 @@ the INSTALL_PREFIX and TOOLCHAIN variables are pointed appropriately.
 cd tinyusd\build
 mkdir tinyusd
 cd tinyusd
-cmake -G "Visual Studio 15 2017 Win64" ../.. -DCMAKE_INSTALL_PREFIX=C:\projects\tinyusd\build\install -DCMAKE_TOOLCHAIN_FILE=C:\projects\tinyusd\packages\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake -G "Visual Studio 15 2017 Win64" ../.. -DCMAKE_INSTALL_PREFIX=C:\projects\tinyusd\build\install
+-DCMAKE_PREFIX_PATH=C:\projects\tinyusd\build\install -DCMAKE_TOOLCHAIN_FILE=C:\projects\tinyusd\packages\vcpkg\scripts\buildsystems\vcpkg.cmake
 ```
 
 Build tinyusd.

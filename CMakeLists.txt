@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.11)
 project(tinyusd)
 
 set(TINYUSD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-set(LOCAL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/build/install")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/scripts
                       ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/modules)
@@ -36,7 +35,7 @@ target_link_libraries(tinyusd ${USD_LIBRARIES})
 if (MSVC_IDE)
     # hack to get around the "Debug" and "Release" directories cmake tries to add on Windows
     #set_target_properties(tinyusd PROPERTIES PREFIX "../")
-    set_target_properties(tinyusd PROPERTIES IMPORT_PREFIX "../")
+    #set_target_properties(tinyusd PROPERTIES IMPORT_PREFIX "../")
 endif()
 
 set_target_properties(tinyusd
