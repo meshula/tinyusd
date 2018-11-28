@@ -84,7 +84,7 @@ clone the code.
 ```
 mkdir opensubdiv
 cd opensubdiv
-cmake ..\..\..\OpenSubdiv -DNO_REGRESSION=ON -DNO_DOC=ON -DNO_OMP=ON -DNO_CUDA=ON -DNO_OPENCL=ON -DNO_DX=ON -DNO_TESTS=ON -DGLEW_LOCATION=c:\Projects\meshula\aaa\vcpkg\installed\x64-windows -DNO_TBB=ON -DCMAKE_INSTALL_PREFIX=c:\Projects\meshula\aaa\install -G "Visual Studio 15 2017 Win64"
+cmake ..\..\..\OpenSubdiv -DNO_REGRESSION=ON -DNO_DOC=ON -DNO_OMP=ON -DNO_CUDA=ON -DNO_OPENCL=ON -DNO_DX=ON -DNO_TESTS=ON -DGLEW_LOCATION=c:\projects\tinyusd\install\vcpkg\installed\x64-windows -DNO_TBB=ON -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -G "Visual Studio 15 2017 Win64"
 
 cmake --build . --config Release --target install -- /M:2
 cd ..
@@ -108,7 +108,7 @@ appropriate paths.
 
 
 ```
-cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_INSTALL_PREFIX=c:\Projects\meshula\aaa\install -DCMAKE_TOOLCHAIN_FILE=c:\Projects\meshula\aaa\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 15 2017 Win64" ../../packages/USD
+cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -DCMAKE_TOOLCHAIN_FILE=c:\projects\tinyusd\install\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 15 2017 Win64" ../../packages/USD
 ```
 
 Build USD
