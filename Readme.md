@@ -1,11 +1,12 @@
 
 **Tiny USD**
 
-This isn't a tiny re-implementation of USD. This is a tutorial on creating the 
+This isn't a tiny re-implementation of USD. This is a tutorial on creating the
 smallest possible viable USD program from scratch on Windows.
 
-It skips building Hydra, as that introduces significant complexity to the build
-process.
+There are two variants presented; one without Pixar's Hydra rendering engine, and
+one with. The build is much quicker and simpler without Hydra, and is often not
+needed, so that variant is presented first.
 
 Prerequisites
 -------------
@@ -17,57 +18,80 @@ Prerequisites
 Building
 --------
 
-Shallow clone the USD dev branch into this project's packages directory:
+Clone the USD dev branch into this project's packages directory:
 
 ```
 cd tinyusd
 mkdir packages
 cd packages
-git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
+git clone https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
-Install vcpkg. This only takes a couple of minutes:
+Next, get a copy of boost. The latest version of boost has the least amount of
+issues with the latest Visual Studio and Xcodes. Pixar's recommended boosts are
+1.55 for linux, and 1.61 otherwise.
 
 ```
-git clone --depth 1 https://github.com/Microsoft/vcpkg
-cd vcpkg
-.\bootstrap-vcpkg.bat
+https://downloads.sourceforge.net/project/boost/boost/1.55.0/boost_1_55_0.tar.gz
+https://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz
+https://downloads.sourceforge.net/project/boost/boost/1.69.0/boost_1_69_0.tar.gz
 ```
 
-Next, build boost. This takes a while, might be a good moment to file an issue on USD requesting
-the elimination of boost as a dependency ;) We're only going to install the bits
-USD needs, so bear with...
+boost is a large library that takes a long time to compile; in order to avoid this
+detour, this tutorial skips two tools: sdfdump, and sdfilter, which require
+boost program_options. If you need this, you'll need to build at least program_options.
+
+Anyway, download and unzip the archive. This tutorial will only need the headers, so either copy the
+boost folder containing the headers into packages, or copy the whole unpacked
+directory. If you downloaded boost_1_69_0, the minimum necessary is to copy the
+folder boost in the boost_1_69_0 folder to packages.
 
 ```
-vcpkg install boost-assign:x64-windows boost-atomic:x64-windows boost-date-time:x64-windows boost-filesystem:x64-windows boost-format:x64-windows boost-multi-index:x64-windows boost-program-options:x64-windows boost-thread:x64-windows boost-vmd:x64-windows
+packages
+ +--boost
+      +-- accumulators
+      +-- archive
+      etc
 ```
 
+Obtain Intel's TBB library. Grab it from the list of "assets" here:
 
-A little bit of other boost will be installed as a result, but don't worry about it.
-At least it's not all of boost which takes a really long time to build.
+https://github.com/01org/tbb/releases
 
-Install the remaining dependencies:
-
-```
-vcpkg install tbb:x64-windows zlib:x64-windows glew:x64-windows
-```
-
-Optional: alembic
+Extract the archive. It will contain a folder with a name like tbb2019_20181203oss.
+Move this folder into the packages directory.
 
 ```
-vcpkg install alembic:x64-windows
-```
-The version of Alembic in vcpkg includes
-the HDF5 backend, which means it takes rather a long time to build.
-
-Optional: ptex
-
-```
-vcpkg install ptex:x64-windows
+packages
+ +-- boost
+      +-- accumulators
+      +-- archive
+      etc
+ +-- tbb2019_20181203oss
 ```
 
+Obtain a zlib archive, and unzip it.
+
+https://github.com/madler/zlib/archive/v1.2.11.zip
+
 ```
-cd ..
+packages
+ +-- boost
+      +-- accumulators
+      +-- archive
+      etc
+ +-- tbb2019_20181203oss
+ +-- zlib-1.2.11
+```
+
+Build it. These instructions are for Windows. In a Visual Studio x64 command shell:
+
+```
+cd zlib-1.2.11
+mkdir build
+cd build
+cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="../install" ..
+cmake --build . --config Release --target install
 ```
 
 Make a build directory in the /tinyusd directory:
@@ -75,19 +99,6 @@ Make a build directory in the /tinyusd directory:
 ```
 mkdir build
 cd build
-```
-
-Optional: install OpenSubdiv
-
-clone the code.
-
-```
-mkdir opensubdiv
-cd opensubdiv
-cmake ..\..\..\OpenSubdiv -DNO_REGRESSION=ON -DNO_DOC=ON -DNO_OMP=ON -DNO_CUDA=ON -DNO_OPENCL=ON -DNO_DX=ON -DNO_TESTS=ON -DGLEW_LOCATION=c:\projects\tinyusd\install\vcpkg\installed\x64-windows -DNO_TBB=ON -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -G "Visual Studio 15 2017 Win64"
-
-cmake --build . --config Release --target install -- /M:2
-cd ..
 ```
 
 ```
@@ -98,26 +109,105 @@ cd usd
 Configure USD
 -------------
 
-We are going to build USD without python, as python
-introduces significant build complexity.
+#Important
 
-First, configure the build, from within the build/usd directory.
-
-In the command below, replace the PREFIX and TOOLCHAIN variable values with
-appropriate paths.
-
+There is residual usage of boost by the tools sdfdump and sdfilter. Comment them out in USD/pxr/usd/bin/CMakeLists.txt
+Remove the references to program_options in USD/cmake/defaults/Packages.cmake, i.e.:
 
 ```
-cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -DCMAKE_TOOLCHAIN_FILE=c:\projects\tinyusd\install\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 15 2017 Win64" ../../packages/USD
+    # --Boost
+    find_package(Boost)
+```
+
+Configure the build from within the build/usd directory. In all the commands that follow,
+replace PROJECT_DIR with a full path to your project root. In my case, PROJECT_DIR is c:/projects/
+
+At this point, if you are intending to build Hydra, skip ahead to Building With Hydra.
+
+```
+cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DPXR_BUILD_IMAGING=OFF -DPXR_ENABLE_GL_SUPPORT=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_PREFIX_PATH=PROJECT_DIR/tinyusd/packages/tbb2019_20181203oss;PROJECT_DIR/tinyusd/packages/zlib-1.211/install;PROJECT_DIR/tinyusd/packages -DCMAKE_INSTALL_PREFIX=PROJECT_DIR/tinyusd/install -G "Visual Studio 15 2017 Win64" ../../packages/USD
 ```
 
 Build USD
 ---------
 
-I'm building on an older laptop, so I've specified two cores, /M:2.
+I'm building on an older laptop, so I've specified three cores, /M:3.
 
 ```
-cmake --build . --config Release --target install -- /M:2
+cmake --build . --config Release --target install -- /M:3
+```
+
+
+Building with Hydra
+-------------------
+
+USD is quite usable without Hydra. Hydra is a useful reference renderer
+visual validation in viewports and so on. Building Hydra is more
+complicated because additional dependencies are introduced. The base procedure
+is the same as for building USD, but before configuring USD, the additional
+dependencies must also be satisfied.
+
+Having completed all the previous steps, up to Configure USD, obtain and unpack glew into the packages folder.
+
+```
+https://downloads.sourceforge.net/project/glew/glew/2.0.0/glew-2.0.0-win32.zip
+```
+```
+packages
+ +-- boost
+      +-- accumulators
+      +-- archive
+      etc
+ +-- glew-2.1.0
+      +-- bin
+      etc
+ +-- tbb2019_20181203oss
+ +-- zlib-1.2.11
+```
+
+This leaves openexr and opensubdiv to be built. In the packages directory:
+
+```
+git clone https://github.com/openexr/openexr.git
+cd openexr
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=PROJECT_DIR/tinyusd/install -G "Visual Studio 15 2017 Win64"  -DCMAKE_PREFIX_PATH=PROJECT_DIR/tinyusd/packages/zlib-1.211/install -DOPENEXR_BUILD_PYTHON_LIBS=OFF -DOPENEXR_ENABLE_TESTS=OFF ../
+```
+and build OpenEXR:
+```
+cmake --build . --config Release --target install -- /M:3
+```
+Okay, that was a piece of cake. Finally, we need OpenSubdiv. Once again, in the
+packages directory:
+
+```
+git clone https://github.com/PixarAnimationStudios/OpenSubdiv.git
+```
+
+Now configure opensubdiv. Note that USD wants to dynamically link GLEW, so the
+opensubdiv build must be forced to comply.
+
+```
+cd opensubdiv
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=PROJECT_DIR/tinyusd/install -G "Visual Studio 15 2017 Win64" -DGLEW_LIBRARY=PROJECT_DIR/tinyusd/packages/glew-2.1.0/lib/x64/glew32.lib -DGLEW_INCLUDE_DIR=PROJECT_DIR/tinyusd/packages/glew-2.1.0/include -DZLIB_INCLUDE_DIR=PROJECT_DIR/tinyusd/packages/zlib-1.211/install/include -DZLIB_LIBRARY=PROJECT_DIR/tinyusd/packages/zlib-1.211/install/lib/zlib.lib -DCMAKE_PREFIX_PATH=PROJECT_DIR/tinyusd/packages/zlib-1.211/install;PROJECT_DIR/tinyusd/packages/tbb2019_20181203oss -DNO_EXAMPLES=1 -DNO_TUTORIALS=1 -DNO_REGRESSION=1 -DNO_DOC=1 -DNO_OMP=1 ../
+```
+and build OpenSubdiv:
+```
+cmake --build . --config Release --target install -- /M:3
+```
+
+Configure USD. In the tinyusd/build/usd directory:
+
+```
+cmake ../../packages/USD -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DPXR_BUILD_IMAGING=ON -DPXR_ENABLE_GL_SUPPORT=ON -DPXR_ENABLE_PTEX_SUPPORT=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DZLIB_INCLUDE_DIR=PROJECT_DIR/tinyusd/packages/zlib-1.211/install/include -DZLIB_LIBRARY=PROJECT_DIR/tinyusd/packages/zlib-1.211/install/lib/zlib.lib -DTBB_INCLUDE_DIRS=PROJECT_DIR/tinyusd/packages/tbb2019_20181203oss/include -DTBB_tbb_LIBRARY_DEBUG=PROJECT_DIR/tinyusd/packages/tbb2019_20181203oss/lib/intel64/vc14/tbb_debug.lib -DTBB_tbb_LIBRARY_RELEASE=PROJECT_DIR/tinyusd/packages/tbb2019_20181203oss/lib/intel64/vc14/tbb.lib -DCMAKE_PREFIX_PATH=PROJECT_DIR/tinyusd/packages/tbb2019_20181203oss;PROJECT_DIR/tinyusd/packages/zlib-1.211/install;PROJECT_DIR/tinyusd/packages/glew-2.1.0;PROJECT_DIR/tinyusd/packages;PROJECT_DIR/tinyusd/install -DCMAKE_INSTALL_PREFIX=PROJECT_DIR/tinyusd/install -G "Visual Studio 15 2017 Win64"
+```
+
+and build it:
+```
+cmake --build . --config Release --target install -- /M:3
 ```
 
 Finish up the installation
@@ -129,19 +219,8 @@ to the bin directory, and
 the usd folder from the lib directory to the tinyusd/build/install/bin directory.
 
 When built without the imaging packages, there is no runtime dependency on boost,
-so the only other dlls that need to be copied are tbb.dll and zlib1.dll, from 
-tinyusd/packages/vcpkg/installed/x64-windows/bin.
-
-sdfdump.exe also requires boost_program_options.
-
-If you installed Ptex, you'll need to copy Ptex.dll.
-
-
-Double check your work
-----------------------
-
-There is an executable in the bin directory called sdfdump.exe. Running it
-should result in the executable running, without any complaints of missing dlls.
+so the only other dlls that need to be copied are tbb.dll and zlib1.dll, from
+the bin folders in the tbb and zlib package directories.
 
 
 TinyUsd
@@ -173,8 +252,8 @@ the INSTALL_PREFIX and TOOLCHAIN variables are pointed appropriately.
 cd tinyusd\build
 mkdir tinyusd
 cd tinyusd
-cmake -G "Visual Studio 15 2017 Win64" ../.. -DCMAKE_INSTALL_PREFIX=C:\projects\tinyusd\build\install
--DCMAKE_PREFIX_PATH=C:\projects\tinyusd\build\install -DCMAKE_TOOLCHAIN_FILE=C:\projects\tinyusd\packages\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake -G "Visual Studio 15 2017 Win64" ../.. -DCMAKE_INSTALL_PREFIX=C:/projects/tinyusd/build/install
+-DCMAKE_PREFIX_PATH=C:/projects/tinyusd/build/install -DCMAKE_TOOLCHAIN_FILE=C:/projects/tinyusd/packages/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
 Build tinyusd.
@@ -184,7 +263,7 @@ cmake --build . --config Release --target install -- /M:2
 ```
 
 Make sure you have a c:\tmp directory.
-When you run the program from the tinyusd\build\install\bin directory, it should 
+When you run the program from the tinyusd\build\install\bin directory, it should
 create a simple USDA file:
 
 ```
