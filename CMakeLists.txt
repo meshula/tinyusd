@@ -2,17 +2,13 @@
 cmake_minimum_required(VERSION 3.11)
 project(tinyusd)
 
-set(TINYUSD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/scripts
-                      ${CMAKE_CURRENT_SOURCE_DIR}/../LabCMake/modules)
-
-set(LAB_PACKAGE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/packages/vcpkg/installed/x64-windows)
-set(LAB_BOOST_VCPKG ON)
-
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Utilities)
-include(Settings)
-include(Packages)
+find_package(Usd)
+find_package(TBB)
+find_package(Boost) # headers only
+
+set(TINYUSD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(tinyusd "")
 lab_default_definitions(tinyusd)
@@ -23,19 +19,25 @@ file(GLOB HEADERS "headers/*.h")
 target_sources(tinyusd PRIVATE ${SRC})
 target_sources(tinyusd PRIVATE ${HEADERS})
 
-target_compile_definitions(tinyusd PUBLIC ${USD_DEFINES})
+target_compile_definitions(tinyusd PUBLIC ${USD_DEFINES} PXR_STATIC)
 
 target_include_directories(tinyusd PRIVATE
-    ${tinyusd_ROOT}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/packages/vcpkg/installed/x64-windows/include
-    ${LOCAL_ROOT}/include)
+    ${USD_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${tinyusd_ROOT}/src)
 
-target_link_libraries(tinyusd ${USD_LIBRARIES})
+# note: target_link_libraries requires the optimized/debug keyword to be 
+# applied per library, not to a list.
+foreach(lib ${USD_LIBRARIES})
+    target_link_libraries(tinyusd optimized ${lib})
+endforeach()
+foreach(lib ${USD_DEBUG_LIBRARIES})
+    target_link_libraries(tinyusd debug ${lib})
+endforeach()
+target_link_libraries(tinyusd optimized ${TBB_tbb_LIBRARY_RELEASE} debug ${TBB_tbb_LIBRARY_DEBUG})
 
-if (MSVC_IDE)
-    # hack to get around the "Debug" and "Release" directories cmake tries to add on Windows
-    #set_target_properties(tinyusd PROPERTIES PREFIX "../")
-    #set_target_properties(tinyusd PROPERTIES IMPORT_PREFIX "../")
+if (MSVC)
+    target_link_libraries(tinyusd Shlwapi.lib Dbghelp.lib WSock32.lib)
 endif()
 
 set_target_properties(tinyusd

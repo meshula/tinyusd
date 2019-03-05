@@ -100,6 +100,7 @@ public:
 
 int main(char** argv, int argc)
 {
+    Plug_InitConfig();
     SceneProxy scene;
     scene.create_new_stage("C:\\TMP\\test.usda");
     scene.save_stage();
