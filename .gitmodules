@@ -1,0 +1,13 @@
+[submodule "submodules/USD"]
+	path = submodules/USD
+	url = https://github.com/meshula/USD.git
+	branch = ios
+[submodule "submodules/ios-cmake"]
+	path = submodules/ios-cmake
+	url = https://github.com/leetal/ios-cmake.git
+[submodule "submodules/tbb"]
+	path = submodules/tbb
+	url = https://github.com/wjakob/tbb.git
+[submodule "submodules/boost-core"]
+	path = submodules/boost-core
+	url = https://github.com/boostorg/core.git
