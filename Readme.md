@@ -52,12 +52,12 @@ THAT CODE IS NOT YET WRITTEN
 TODO
 ----
 
-[ ] Add other boost submodules as required
-[ ] Create a top level cmake file that uses the toolchain file to build the submodules
-[ ] Resolve build issues in USD
-[ ] Patch USD to find and initialize the plugins (otherwise nothing will be loadable by USD)
-[ ] Add a Framework target to the USD CMake system to create an encapsulated USD.framework for macos, and ios
-[ ] Create a simple usd viewing application for ios that simply displays the hierarchy of files in a loaded USD file
-[ ] Create an importer for mesh and other geometry to translate USD data in ModelIO data structures
-[ ] Create a usd viewing application for ios that visualizes the contents of a USD file with Metal or SceneKit
+ - [ ] Add other boost submodules as required
+ - [ ] Create a top level cmake file that uses the toolchain file to build the submodules
+ - [ ] Resolve build issues in USD
+ - [ ] Patch USD to find and initialize the plugins (otherwise nothing will be loadable by USD)
+ - [ ] Add a Framework target to the USD CMake system to create an encapsulated USD.framework for macos, and ios
+ - [ ] Create a simple usd viewing application for ios that simply displays the hierarchy of files in a loaded USD file
+ - [ ] Create an importer for mesh and other geometry to translate USD data in ModelIO data structures
+ - [ ] Create a usd viewing application for ios that visualizes the contents of a USD file with Metal or SceneKit
 
