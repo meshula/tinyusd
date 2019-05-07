@@ -32,9 +32,8 @@ Building
 --------
 First, configure the build, from within your build/usd.
 
-NOTE: THIS IS A NONFUNCTIONAL PLACEHOLDER, WE WILL USE THE TOOLCHAIN FILE FROM THE submodules DIRECTORY
 ```
-cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -DCMAKE_TOOLCHAIN_FILE=c:\projects\tinyusd\install\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 15 2017 Win64" ../../packages/USD
+cmake /path/to/tinyusd/ -G Xcode -DCMAKE_TOOLCHAIN_FILE=/path/to/tinyusd/submodules/ios-cmake/ios.toolchain.cmake -DPLATFORM=OS64COMBINED
 ```
 
 NOTE: UNTIL THE ROOT CMAKE FILE IS CORRECT, THIS WILL NOT WORK
