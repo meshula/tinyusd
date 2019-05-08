@@ -8,6 +8,3 @@
 [submodule "submodules/tbb"]
 	path = submodules/tbb
 	url = https://github.com/wjakob/tbb.git
-[submodule "submodules/boost-core"]
-	path = submodules/boost-core
-	url = https://github.com/boostorg/core.git
