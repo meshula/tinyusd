@@ -20,11 +20,13 @@ set(Boost_LIBRARY_DIRS "")
 set(Boost_LIBRARIES "")
 
 # Same, for tbb
-#set(TBB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include")
-#set(TBB_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include"
-#    CACHE FILEPATH "TBB include directory")
-#set(TBB_LIBRARY_DIRS "")
-#set(TBB_LIBRARIES"")
+set(TBB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include")
+set(TBB_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include"
+    CACHE FILEPATH "TBB include directory")
+set(TBB_LIBRARY_DIRS "")
+set(TBB_LIBRARIES"")
+
+set(CMAKE_CXX_STANDARD 14)
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
 set(PXR_BUILD_TESTS OFF CACHE BOOL "Build tests" FORCE)
