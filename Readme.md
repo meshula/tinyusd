@@ -33,13 +33,10 @@ Building
 First, configure the build, from within your build/usd.
 
 ```
-cmake /path/to/tinyusd/ -G Xcode -DCMAKE_TOOLCHAIN_FILE=/path/to/tinyusd/submodules/ios-cmake/ios.toolchain.cmake -DPLATFORM=OS64COMBINED
+cmake ../../tinyusd/ -G Xcode -DCMAKE_TOOLCHAIN_FILE=/path/to/tinyusd/submodules/ios-cmake/ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DENABLE_VISIBILITY=1 -DCMAKE_INSTALL_PREFIX=/path/to/your/install -DDEPLOYMENT_TARGET=10.0
 ```
 
-NOTE: UNTIL THE ROOT CMAKE FILE IS CORRECT, THIS WILL NOT WORK
-```
-cmake --build . --config Release --target install
-```
+Build in Xcode.
 
 Double check your work
 ----------------------
@@ -51,9 +48,9 @@ THAT CODE IS NOT YET WRITTEN
 TODO
 ----
 
- - [ ] Add other boost submodules as required
- - [ ] Create a top level cmake file that uses the toolchain file to build the submodules
- - [ ] Resolve build issues in USD
+ - [X] Add other boost submodules as required
+ - [X] Create a top level cmake file that uses the toolchain file to build the submodules
+ - [X] Resolve build issues in USD
  - [ ] Patch USD to find and initialize the plugins (otherwise nothing will be loadable by USD)
  - [ ] Add a Framework target to the USD CMake system to create an encapsulated USD.framework for macos, and ios
  - [ ] Create a simple usd viewing application for ios that simply displays the hierarchy of files in a loaded USD file
