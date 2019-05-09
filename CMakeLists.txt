@@ -24,7 +24,8 @@ set(TBB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include")
 set(TBB_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include"
     CACHE FILEPATH "TBB include directory")
 set(TBB_LIBRARY_DIRS "")
-set(TBB_LIBRARIES"")
+set(TBB_LIBRARIES "tbb_static tbbmalloc_static")
+set(TBB_tbb_LIBRARY "tbb_static")
 
 set(CMAKE_CXX_STANDARD 14)
 
