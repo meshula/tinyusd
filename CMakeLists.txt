@@ -2,6 +2,12 @@
 cmake_minimum_required(VERSION 3.14)
 project(tinyusd)
 
+# Force libc++, clang specific.
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -D_LIBCPP_VERSION")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+
 SET(TBB_BUILD_TESTS OFF CACHE BOOL "Build TBB tests and enable testing infrastructure" FORCE)
 SET(TBB_BUILD_SHARED OFF CACHE BOOL "Build TBB shared library" FORCE)
 add_subdirectory(submodules/tbb)
@@ -26,8 +32,6 @@ set(TBB_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/submodules/tbb/include"
 set(TBB_LIBRARY_DIRS "")
 set(TBB_LIBRARIES "tbb_static tbbmalloc_static")
 set(TBB_tbb_LIBRARY "tbb_static")
-
-set(CMAKE_CXX_STANDARD 14)
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
 set(PXR_BUILD_TESTS OFF CACHE BOOL "Build tests" FORCE)
