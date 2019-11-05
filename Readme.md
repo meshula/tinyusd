@@ -30,13 +30,28 @@ git submodule update --init
 
 Building
 --------
-First, configure the build, from within your build/usd.
 
+1. Enter build path:
 ```
-cmake ../../tinyusd/ -G Xcode -DCMAKE_TOOLCHAIN_FILE=/path/to/tinyusd/submodules/ios-cmake/ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DENABLE_VISIBILITY=1 -DCMAKE_INSTALL_PREFIX=/path/to/your/install -DDEPLOYMENT_TARGET=10.0
+cd build
 ```
 
-Build in Xcode.
+2. Generate the build products
+```
+./run_here.sh
+```
+
+3. Open Project in Xcode
+```
+open tinyusd.xcodeproj
+```
+
+4. Fix Team
+- Select the main project `tinyusd` and open "Build Settings"
+- Under "Signing" -> "Development Team"
+- Select your dev team
+
+5. Select target `ALL BUILD` and build everything
 
 Double check your work
 ----------------------

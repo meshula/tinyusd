@@ -1,3 +1,15 @@
-build/
 packages/
 .vscode/
+
+build/*
+!build/run_here.sh
+
+# Xcode
+
+## User settings
+xcuserdata/
+
+## Build products
+*.dSYM.zip
+*.dSYM
+*.hmap
