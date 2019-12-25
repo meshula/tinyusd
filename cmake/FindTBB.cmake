@@ -150,8 +150,6 @@ if(NOT TBB_FOUND)
       PATHS ${TBB_DEFAULT_SEARCH_DIR}
       PATH_SUFFIXES include)
 
-message(XXX, "${TBB_INCLUDE_DIRS}")
-
   ##################################
   # Find TBB components
   ##################################

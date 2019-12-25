@@ -2,17 +2,17 @@
 **Tiny USD**
 
 This isn't a tiny re-implementation of USD. This is a tutorial on creating the 
-smallest possible viable USD program from scratch on Windows.
+smallest possible viable USD program, using C++, from scratch on macOS.
 
-It skips building Hydra, as that introduces significant complexity to the build
-process.
+It skips building Hydra and the Python bindings, as that introduces 
+significant complexity to the build process.
 
 Prerequisites
 -------------
 
 - git
 - cmake 3.11 or greater installed for the command line
-- Visual Studio 2017
+- Xcode command line tools
 
 Building
 --------
@@ -26,172 +26,109 @@ cd packages
 git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
-Install vcpkg. This only takes a couple of minutes:
+Next, fetch boost and build it. In the packages directory:
 
 ```
-git clone --depth 1 https://github.com/Microsoft/vcpkg
-cd vcpkg
-.\bootstrap-vcpkg.bat
+curl -# -L -o boost_1_61_0.tgz https://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz
+tar -zxvf boost_1_61_0.tgz
+cd boost_1_61_0
+./bootstrap.sh
+./b2 --prefix="../" --build-dir="build" address-model=64 link=static runtime-link=static threading=multi variant=release toolset=clang install --with-program_options
 ```
 
-Next, build boost. This takes a while, might be a good moment to file an issue on USD requesting
-the elimination of boost as a dependency ;) We're only going to install the bits
-USD needs, so bear with...
+--with-system isn't strictly needed, but otherwise b2 will attempt to build everything. Maybe there's a b2 option to only copy headers?
+
+build boost. This takes a long time, even though it's just headers to copy. Sigh. -
+
+Next, fetch and build tbb. In the packages directory:
 
 ```
-vcpkg install boost-assign:x64-windows boost-atomic:x64-windows boost-date-time:x64-windows boost-filesystem:x64-windows boost-format:x64-windows boost-multi-index:x64-windows boost-program-options:x64-windows boost-thread:x64-windows boost-vmd:x64-windows
+curl -# -L -o tbb_2017_U2.tgz https://github.com/01org/tbb/archive/2017_U2.tar.gz
+tar -zxvf tbb_2017_U2.tgz
+cd tbb_2017_U2
+make -j4
+cp build/*_release/libtbb*.* ../lib/
+cp -r include/serial/ ../include/serial
+cp -r include/tbb/ ../include/tbb
 ```
 
-
-A little bit of other boost will be installed as a result, but don't worry about it.
-At least it's not all of boost which takes a really long time to build.
-
-Install the remaining dependencies:
-
-```
-vcpkg install tbb:x64-windows zlib:x64-windows glew:x64-windows
-```
-
-Optional: alembic
-
-```
-vcpkg install alembic:x64-windows
-```
-The version of Alembic in vcpkg includes
-the HDF5 backend, which means it takes rather a long time to build.
-
-Optional: ptex
-
-```
-vcpkg install ptex:x64-windows
-```
-
-```
-cd ..
-```
-
-Make a build directory in the /tinyusd directory:
-
-```
-mkdir build
-cd build
-```
-
-Optional: install OpenSubdiv
-
-clone the code.
-
-```
-mkdir opensubdiv
-cd opensubdiv
-cmake ..\..\..\OpenSubdiv -DNO_REGRESSION=ON -DNO_DOC=ON -DNO_OMP=ON -DNO_CUDA=ON -DNO_OPENCL=ON -DNO_DX=ON -DNO_TESTS=ON -DGLEW_LOCATION=c:\projects\tinyusd\install\vcpkg\installed\x64-windows -DNO_TBB=ON -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -G "Visual Studio 15 2017 Win64"
-
-cmake --build . --config Release --target install -- /M:2
-cd ..
-```
-
-```
-mkdir usd
-cd usd
-```
 
 Configure USD
 -------------
 
+Once again, starting in the packages directory:
+
+```
+mkdir usd-build;cd usd-build
+```
+
 We are going to build USD without python, as python
 introduces significant build complexity.
 
-First, configure the build, from within the build/usd directory.
+First, configure the build, from within the usd-build directory.
 
 In the command below, replace the PREFIX and TOOLCHAIN variable values with
 appropriate paths.
 
-
 ```
-cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="/Zm150" -DCMAKE_INSTALL_PREFIX=c:\projects\tinyusd\install\install -DCMAKE_TOOLCHAIN_FILE=c:\projects\tinyusd\install\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 15 2017 Win64" ../../packages/USD
+cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DPXR_BUILD_IMAGING=OFF -DCMAKE_INSTALL_PREFIX=..  -G "Xcode" ../USD
 ```
 
 Build USD
 ---------
 
-I'm building on an older laptop, so I've specified two cores, /M:2.
-
 ```
-cmake --build . --config Release --target install -- /M:2
+cmake --build . --config Release --target install
 ```
 
 Finish up the installation
 --------------------------
 
-In a little while, tinyusd/build/install will contain the USD installation. The
-USD install puts the runtime DLLs in the lib directory, so copy the libusd_ms.dll
-to the bin directory, and
-the usd folder from the lib directory to the tinyusd/build/install/bin directory.
-
-When built without the imaging packages, there is no runtime dependency on boost,
-so the only other dlls that need to be copied are tbb.dll and zlib1.dll, from 
-tinyusd/packages/vcpkg/installed/x64-windows/bin.
-
-sdfdump.exe also requires boost_program_options.
-
-If you installed Ptex, you'll need to copy Ptex.dll.
-
+In a little while, packages/lib will contain the libusd_ms.dylib, and packages/include will have the headers, packages/bin will have sdfdump and sdffilter.
 
 Double check your work
 ----------------------
 
-There is an executable in the bin directory called sdfdump.exe. Running it
-should result in the executable running, without any complaints of missing dlls.
-
+There is an executable in the bin directory called sdfdump. Running it
+should result in the executable describing its input arguments, without any complaints of missing dylibs.
 
 TinyUsd
 -------
 
-CMake isn't super fun to deal with, so for the purposes of this tutorial,
-please go clone LabCMake as a sister directory to tinyusd. LabCMake is here:
+Go back into the packages directory we made earlier, and create a tinyusd-build directory,
+and cd into it. 
 
 ```
-cd ..\..\..
-git clone https://github.com/meshula/LabCMake.git
+mkdir tinyusd-build;cd tinyusd-build
 ```
 
-It doesn't have any build steps, it just needs to be available at the relative location.
-
-i.e.
-
-```
-Projects/
-   LabCMake/
-   tinyusd/
-```
-
-Go back into the build directory we made earlier, and create a tinyusd directory,
-and cd into it. Then, configure the cmake build files. Once again, make sure
+Then, configure the cmake build files. Once again, make sure
 the INSTALL_PREFIX and TOOLCHAIN variables are pointed appropriately.
 
 ```
-cd tinyusd\build
-mkdir tinyusd
-cd tinyusd
-cmake -G "Visual Studio 15 2017 Win64" ../.. -DCMAKE_INSTALL_PREFIX=C:\projects\tinyusd\build\install
--DCMAKE_PREFIX_PATH=C:\projects\tinyusd\build\install -DCMAKE_TOOLCHAIN_FILE=C:\projects\tinyusd\packages\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake -G "Xcode" ../.. -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_PREFIX_PATH=..
 ```
 
 Build tinyusd.
 
 ```
-cmake --build . --config Release --target install -- /M:2
+cmake --build . --config Release --target install
 ```
 
-Make sure you have a c:\tmp directory.
-When you run the program from the tinyusd\build\install\bin directory, it should 
-create a simple USDA file:
+Haven't got the rpath installation set up correctly in the cmake file yet, so go to the bin directory, and add it.
 
 ```
-c:\tmp\test.usda
+cd ../bin
+install_name_tool -add_rpath ../lib tinyusd
 ```
 
-As a sanity check, the generated file should have the following contents:
+Now, run tinyusd.
+
+```
+./tinyusd
+```
+
+Sanity check that tinyusd generated a file named test.usd, containing the following:
 
 ```
 #usda 1.0
