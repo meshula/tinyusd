@@ -1,136 +1,124 @@
 
-**Tiny USD**
+# Tiny USD
 
-This isn't a tiny re-implementation of USD. This is a tutorial on creating the 
-smallest possible viable USD program, using C++, from scratch on macOS.
+A tutorial on creating the smallest possible viable USD program, using
+the dev branch of the official usd distribution.
 
-It skips building Hydra and the Python bindings, as that introduces 
-significant complexity to the build process.
+In the spirit of minimalism, it skips Hydra, and Python bindings.
 
-Prerequisites
+## Prerequisites
 -------------
 
 - git
-- cmake 3.11 or greater installed for the command line
-- Xcode command line tools
+- cmake 3.26 or greater installed for the command line
+- Xcode command line tools, tested with Apple Clang 14
 
-Building
+## Building
 --------
 
 Shallow clone the USD dev branch into this project's packages directory:
 
-```
+```sh
 cd tinyusd
 mkdir packages
 cd packages
 git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
-Next, fetch boost and build it. In the packages directory:
+Next, fetch boost and build it. In this project's root directory, run `get_boost.sh`.
 
 ```
-curl -# -L -o boost_1_61_0.tgz https://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz
-tar -zxvf boost_1_61_0.tgz
-cd boost_1_61_0
+curl -# -L -o boost_1_78_0.tgz https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
+tar -zxvf boost_1_78_0.tgz
+cd boost_1_78_0
 ./bootstrap.sh
 ./b2 --prefix="../" --build-dir="build" address-model=64 link=static runtime-link=static threading=multi variant=release toolset=clang install --with-program_options
 ```
 
---with-system isn't strictly needed, but otherwise b2 will attempt to build everything. Maybe there's a b2 option to only copy headers?
-
-build boost. This takes a long time, even though it's just headers to copy. Sigh. -
-
-Next, fetch and build tbb. In the packages directory:
+Next, fetch and build tbb. In the root directory:
 
 ```
-curl -# -L -o tbb_2017_U2.tgz https://github.com/01org/tbb/archive/2017_U2.tar.gz
-tar -zxvf tbb_2017_U2.tgz
-cd tbb_2017_U2
-make -j4
-cp build/*_release/libtbb*.* ../lib/
-cp -r include/serial/ ../include/serial
-cp -r include/tbb/ ../include/tbb
+./get_tbb.sh
 ```
 
-
-Configure USD
+## Configure USD
 -------------
 
 Once again, starting in the packages directory:
 
-```
+```sh
 mkdir usd-build;cd usd-build
 ```
 
-We are going to build USD without python, as python
-introduces significant build complexity.
+We are going to build USD without python, as python adds complexity,
+by requiring that boost python be built.
 
 First, configure the build, from within the usd-build directory.
 
 In the command below, replace the PREFIX and TOOLCHAIN variable values with
 appropriate paths.
 
-```
+```sh
 cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DPXR_BUILD_IMAGING=OFF -DCMAKE_INSTALL_PREFIX=..  -G "Xcode" ../USD
 ```
 
-Build USD
+## Build USD
 ---------
 
-```
+```sh
 cmake --build . --config Release --target install
 ```
 
-Finish up the installation
+## Finish up the installation
 --------------------------
 
 In a little while, packages/lib will contain the libusd_ms.dylib, and packages/include will have the headers, packages/bin will have sdfdump and sdffilter.
 
-Double check your work
+## Double check your work
 ----------------------
 
 There is an executable in the bin directory called sdfdump. Running it
 should result in the executable describing its input arguments, without any complaints of missing dylibs.
 
-TinyUsd
+## TinyUsd
 -------
 
 Go back into the packages directory we made earlier, and create a tinyusd-build directory,
 and cd into it. 
 
-```
+```sh
 mkdir tinyusd-build;cd tinyusd-build
 ```
 
 Then, configure the cmake build files. Once again, make sure
 the INSTALL_PREFIX and TOOLCHAIN variables are pointed appropriately.
 
-```
+```sh
 cmake -G "Xcode" ../.. -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_PREFIX_PATH=..
 ```
 
 Build tinyusd.
 
-```
+```sh
 cmake --build . --config Release --target install
 ```
 
 Haven't got the rpath installation set up correctly in the cmake file yet, so go to the bin directory, and add it.
 
-```
+```sh
 cd ../bin
 install_name_tool -add_rpath ../lib tinyusd
 ```
 
 Now, run tinyusd.
 
-```
+```sh
 ./tinyusd
 ```
 
 Sanity check that tinyusd generated a file named test.usd, containing the following:
 
-```
+```usd
 #usda 1.0
 
 def Cube "Box"
