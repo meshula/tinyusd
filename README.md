@@ -25,16 +25,11 @@ cd packages
 git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
-Next, fetch boost and build it. In this project's root directory, run `get_boost.sh`.
+### boost
+Getch boost and build it. In this project's root directory, run `get_boost.sh`.
+Boost will not be built, the headers as is are sufficient.
 
-```
-curl -# -L -o boost_1_78_0.tgz https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
-tar -zxvf boost_1_78_0.tgz
-cd boost_1_78_0
-./bootstrap.sh
-./b2 --prefix="../" --build-dir="build" address-model=64 link=static runtime-link=static threading=multi variant=release toolset=clang install --with-program_options
-```
-
+### tbb
 Next, fetch and build tbb. In the root directory:
 
 ```
