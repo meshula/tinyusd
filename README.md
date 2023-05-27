@@ -26,14 +26,24 @@ git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
 ### boost
-Getch boost and build it. In this project's root directory, run `get_boost.sh`.
-Boost will not be built, the headers as is are sufficient.
+Fetch boost and unarchive it. Boost will not be built, the headers as is are sufficient.
+
+```sh
+./get_boost.sh
+```
 
 ### tbb
-Next, fetch and build tbb. In the root directory:
+Fetch and build tbb. In the root directory:
 
-```
+```sh
 ./get_tbb.sh
+```
+
+### OpenSubdiv
+If you are building USD with Hydra, you'll need OpenSubdiv.
+
+```sh
+./get_opensubdiv.sh
 ```
 
 ## Configure USD
@@ -53,6 +63,13 @@ First, configure the build, from within the usd-build directory.
 In the command below, replace the PREFIX and TOOLCHAIN variable values with
 appropriate paths.
 
+
+### with Hydra
+```sh
+cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=..  -G "Xcode" ../USD
+```
+
+### without Hydra
 ```sh
 cmake -DPXR_ENABLE_PYTHON_SUPPORT=OFF -DPXR_BUILD_MONOLITHIC=ON -DPXR_BUILD_DOCUMENTATION=OFF -DPXR_BUILD_TESTS=OFF -DPXR_BUILD_IMAGING=OFF -DCMAKE_INSTALL_PREFIX=..  -G "Xcode" ../USD
 ```
