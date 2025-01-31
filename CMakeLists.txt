@@ -6,7 +6,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Utilities)
 find_package(pxr)
 find_package(TBB)
-find_package(Boost) # headers only
 
 set(TINYUSD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 message(XXX, "${TINYUSD_ROOT}")
@@ -23,7 +22,6 @@ target_compile_definitions(tinyusd PUBLIC ${USD_DEFINES} PXR_STATIC)
 
 target_include_directories(tinyusd PRIVATE
     ${USD_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
     ${TINYUSD_ROOT}/include
     ${TINYUSD_ROOT}/src)
 

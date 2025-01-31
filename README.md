@@ -25,13 +25,6 @@ cd packages
 git clone --depth 1 https://github.com/PixarAnimationStudios/USD.git -b dev
 ```
 
-### boost
-Fetch boost and unarchive it. Boost will not be built, the headers as is are sufficient.
-
-```sh
-./get_boost.sh
-```
-
 ### tbb
 Fetch and build tbb. In the root directory:
 
@@ -55,8 +48,8 @@ Once again, starting in the packages directory:
 mkdir usd-build;cd usd-build
 ```
 
-We are going to build USD without python, as python adds complexity,
-by requiring that boost python be built.
+We are going to build USD without python, as python adds build and
+runtime complexity.
 
 First, configure the build, from within the usd-build directory.
 
