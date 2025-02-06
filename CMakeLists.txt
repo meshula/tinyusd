@@ -8,10 +8,10 @@ find_package(pxr)
 find_package(TBB)
 
 set(TINYUSD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-message(XXX, "${TINYUSD_ROOT}")
+message(INFO, "TinyUSD root is ${TINYUSD_ROOT}")
 add_executable(tinyusd "")
 lab_default_definitions(tinyusd)
-lab_set_cxx_version(tinyusd 14)
+lab_set_cxx_version(tinyusd 17)
 
 file(GLOB SRC "src/*.cpp")
 file(GLOB HEADERS "include/*.h")
@@ -22,6 +22,7 @@ target_compile_definitions(tinyusd PUBLIC ${USD_DEFINES} PXR_STATIC)
 
 target_include_directories(tinyusd PRIVATE
     ${USD_INCLUDE_DIR}
+    ${TBB_INCLUDE_DIRS}
     ${TINYUSD_ROOT}/include
     ${TINYUSD_ROOT}/src)
 
@@ -36,8 +37,8 @@ target_include_directories(tinyusd PRIVATE
 
 # Note - there is currently a bug in the generate PxrConfig.cmake file;
 # It outputs many file names in the monolithic static variant, incorrectly
-target_link_libraries(tinyusd optimized ${CMAKE_INSTALL_PREFIX}/lib/libusd_ms.dylib)
-target_link_libraries(tinyusd debug ${CMAKE_INSTALL_PREFIX}/lib/libusd_ms.dylib)
+target_link_libraries(tinyusd optimized ${CMAKE_PREFIX_PATH}/lib/libusd_ms.dylib)
+target_link_libraries(tinyusd debug ${CMAKE_PREFIX_PATH}/lib/libusd_ms.dylib)
 
 if (MSVC)
     target_link_libraries(tinyusd Shlwapi.lib Dbghelp.lib WSock32.lib)
