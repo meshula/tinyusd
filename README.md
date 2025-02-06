@@ -4,7 +4,11 @@
 A tutorial on creating the smallest possible viable USD program, using
 the dev branch of the official usd distribution.
 
-In the spirit of minimalism, it skips Hydra, and Python bindings.
+Note that this currently highly work in progress, the mac recipe is the only
+one fully worked for cmake. The windows recipe still uses build_usd.py, and 
+ubuntu remains a struggle.
+
+Help wanted!
 
 # USD Build Club
 
