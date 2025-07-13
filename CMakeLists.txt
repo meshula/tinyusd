@@ -1,52 +1,61 @@
-
 cmake_minimum_required(VERSION 3.11)
 project(tinyusd)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Utilities)
-find_package(pxr)
-find_package(TBB)
+
+# Find packages with proper error handling
+find_package(pxr REQUIRED)
+find_package(TBB REQUIRED)
+find_package(OpenGL REQUIRED) # for garch
 
 set(TINYUSD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-message(INFO, "TinyUSD root is ${TINYUSD_ROOT}")
+message(STATUS "TinyUSD root is ${TINYUSD_ROOT}")
+
 add_executable(tinyusd "")
 lab_default_definitions(tinyusd)
 lab_set_cxx_version(tinyusd 17)
 
+# Source files
 file(GLOB SRC "src/*.cpp")
 file(GLOB HEADERS "include/*.h")
-target_sources(tinyusd PRIVATE ${SRC})
-target_sources(tinyusd PRIVATE ${HEADERS})
+target_sources(tinyusd PRIVATE ${SRC} ${HEADERS})
 
-target_compile_definitions(tinyusd PUBLIC ${USD_DEFINES} PXR_STATIC)
+# Compiler definitions
+target_compile_definitions(tinyusd PUBLIC ${USD_DEFINES})
 
+# Include directories
 target_include_directories(tinyusd PRIVATE
-    ${USD_INCLUDE_DIR}
-    ${TBB_INCLUDE_DIRS}
+    ${PXR_INCLUDE_DIR}
     ${TINYUSD_ROOT}/include
     ${TINYUSD_ROOT}/src)
 
-# note: target_link_libraries requires the optimized/debug keyword to be 
-# applied per library, not to a list.
-#foreach(lib ${PXR_LIBRARIES})
-#    target_link_libraries(tinyusd optimized ${lib})
-#endforeach()
-#foreach(lib ${PXR_DEBUG_LIBRARIES})
-#    target_link_libraries(tinyusd debug ${lib})
-#endforeach()
-
-# Note - there is currently a bug in the generate PxrConfig.cmake file;
-# It outputs many file names in the monolithic static variant, incorrectly
-target_link_libraries(tinyusd optimized ${CMAKE_PREFIX_PATH}/lib/libusd_ms.dylib)
-target_link_libraries(tinyusd debug ${CMAKE_PREFIX_PATH}/lib/libusd_ms.dylib)
-
-if (MSVC)
-    target_link_libraries(tinyusd Shlwapi.lib Dbghelp.lib WSock32.lib)
-    target_link_libraries(tinyusd optimized ${TBB_tbb_LIBRARY_RELEASE} debug ${TBB_tbb_LIBRARY_DEBUG})
-else ()
-    target_link_libraries(tinyusd ${TBB_tbb_LIBRARY})
+# Link libraries - conditional approach for static vs dynamic
+if(BUILD_SHARED_LIBS)
+    # Dynamic linking - use full library set
+    target_link_libraries(tinyusd PRIVATE
+        ${PXR_LIBRARIES}
+        TBB::tbb
+    )
+else()
+    # Static linking - sanity check: test ONLY gf (no tf)
+    target_link_libraries(tinyusd PRIVATE
+        arch
+        gf
+        TBB::tbb
+    )
 endif()
 
+message(STATUS "PXR_LIBRARIES contains: ${PXR_LIBRARIES}")
+string(REPLACE ";" "|" PXR_LIBRARIES_DEBUG "${PXR_LIBRARIES}")
+message(STATUS "PXR_LIBRARIES debug: ${PXR_LIBRARIES_DEBUG}")
+
+# Platform-specific libraries
+if (MSVC)
+    target_link_libraries(tinyusd PRIVATE Shlwapi.lib Dbghelp.lib WSock32.lib)
+endif()
+
+# Output directories
 set_target_properties(tinyusd
     PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
@@ -54,12 +63,14 @@ set_target_properties(tinyusd
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-install (TARGETS tinyusd
+# Installation
+install(TARGETS tinyusd
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)
 
-install (TARGETS tinyusd DESTINATION bin)
+install(TARGETS tinyusd DESTINATION bin)
 
+# Source groups for IDE
 source_group(source FILES ${SRC})
 source_group(headers FILES ${HEADERS})

@@ -1,3 +1,17 @@
-build/
+# Build directories - each recipe gets its own build-<recipe-name> folder
+build*/
 packages/
+
+# macOS
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# Database files
+db9/
+
+# Temporary files
+.staging/
 
