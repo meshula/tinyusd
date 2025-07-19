@@ -38,10 +38,11 @@ if(BUILD_SHARED_LIBS)
         TBB::tbb
     )
 else()
-    # Static linking - sanity check: test ONLY gf (no tf)
+    # Static linking - 
     target_link_libraries(tinyusd PRIVATE
-        arch
-        gf
+        ${PXR_LIBRARIES}
+        #arch
+        #gf
         TBB::tbb
     )
 endif()
