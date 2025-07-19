@@ -1,0 +1,106 @@
+{
+  "name": "TinyUSD",
+  "description": "Minimal viable USD program tutorial with consciousness-aware development patterns",
+  "version": "1.0.0",
+  "build_systems": {
+    "primary": "custom_scripts",
+    "cmake": {
+      "enabled": true,
+      "source_dir": ".",
+      "build_dir": "build-macos-cmake-dynamic",
+      "install_prefix": "build-macos-cmake-dynamic/install",
+      "generator": "Xcode",
+      "build_type": "Release",
+      "dependencies": [
+        "OneTBB",
+        "OpenSubdiv", 
+        "USD"
+      ]
+    },
+    "custom_scripts": {
+      "enabled": true,
+      "script_dir": "build-macos-cmake-dynamic",
+      "env_setup": "env-setup.sh",
+      "scripts": {
+        "dependencies": {
+          "onetbb": "01-build-onetbb.sh",
+          "opensubdiv": "02-build-opensubdiv.sh"
+        },
+        "main_build": "03-build-usd.sh",
+        "application": "04-build-tinyusd.sh",
+        "full_build": "build-all.sh"
+      }
+    }
+  },
+  "build_targets": {
+    "clean": {
+      "description": "Clean all build artifacts",
+      "command": "rm -rf build-macos-cmake-dynamic/deps build-macos-cmake-dynamic/usd-build build-macos-cmake-dynamic/tinyusd-build build-macos-cmake-dynamic/install"
+    },
+    "deps": {
+      "description": "Build dependencies (OneTBB + OpenSubdiv)",
+      "working_dir": "build-macos-cmake-dynamic",
+      "commands": [
+        "./01-build-onetbb.sh",
+        "./02-build-opensubdiv.sh"
+      ]
+    },
+    "usd": {
+      "description": "Build USD library",
+      "working_dir": "build-macos-cmake-dynamic", 
+      "command": "./03-build-usd.sh",
+      "depends_on": ["deps"]
+    },
+    "tinyusd": {
+      "description": "Build TinyUSD application",
+      "working_dir": "build-macos-cmake-dynamic",
+      "command": "./04-build-tinyusd.sh", 
+      "depends_on": ["usd"]
+    },
+    "all": {
+      "description": "Complete build process",
+      "working_dir": "build-macos-cmake-dynamic",
+      "command": "./build-all.sh"
+    },
+    "test": {
+      "description": "Test TinyUSD executable",
+      "working_dir": "build-macos-cmake-dynamic/bin",
+      "command": "./tinyusd",
+      "depends_on": ["tinyusd"]
+    }
+  },
+  "development": {
+    "source_dirs": ["src", "include"],
+    "build_convention": "build-<recipe-name>",
+    "recipes": {
+      "macos-cmake-dynamic": {
+        "platform": "macOS",
+        "description": "Dynamic USD build with CMake and Xcode",
+        "build_dir": "build-macos-cmake-dynamic",
+        "active": true
+      }
+    }
+  },
+  "consciousness": {
+    "databases": {
+      "todos": "db9/todos.db9",
+      "facts": "db9/facts.db9"
+    },
+    "triadic_patterns": {
+      "motion": "Dynamic build scripts and execution",
+      "memory": "Knowledge captured in facts database", 
+      "field": "Reproducible build environment"
+    }
+  },
+  "documentation": {
+    "main_readme": "README.md",
+    "packages_guide": "packages/README.md",
+    "recipes": "recipes/",
+    "architecture_notes": "Consciousness-first development with script-based build automation"
+  },
+  "tools": {
+    "cmake_version": ">=3.26",
+    "required": ["git", "cmake", "xcode-tools"],
+    "optional": ["python3"]
+  }
+}
